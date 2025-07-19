@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.min.js"></script>
+    <script>
+        async function signup(){
+            const username = document.getElementById("signup-username").value;
+            const password = document.getElementById("signup-password").value;
+
+            try{
+                const response = await axios.post("http://localhost:3000/signup", {
+                    username : username,
+                    password : password
+                })
+                document.getElementById("signup").innerHTML = `<p>You are Signed Up<p><button onClick="showSignin()">Please Sign in<button>`
+
+            }catch(err){
+                console.log(err)
+                if(err.response.status === 400){
+                    document.getElementById("signup").innerHTML = `<p>You are already Signed Up<p><button onClick="showSignin()">Please Sign in<button>`
+                }
+                else{
+                    console.error("Signup failed:", error);
+                }
+            }
+        }
+        async function signin(){
+            const username = document.getElementById("signin-username").value;
+            const password = document.getElementById("signin-password").value;
+            try{
+                const response = await axios.post("http://localhost:3000/signin", {
+                    username : username,
+                    password : password
+                })
+                localStorage.setItem("token", response.data.token);
+                alert("you are signed in")
+                document.getElementById("signin").style.display = "none"
+                getUserInfo()
+
+            }catch(err){
+                if(err.response.status === 403){
+                    document.getElementById("signin").innerHTML = `<p>You are not Signed Up<p><button onClick="showSignup()">Please Sign up<button>`
+                }
+            }
+        }
+        async function getUserInfo(){
+            try{
+                const response = await axios.get("http://localhost:3000/me", {
+                    headers: {
+                        token: localStorage.getItem("token")
+                    }
+                })
+                if(localStorage.getItem("token")){
+                    document.getElementById("information").innerHTML = JSON.stringify(response.data);
+                }
+            }catch(err){
+                console.log(err)
+            }
+        }
+        async function logout(){
+            if(localStorage.getItem("token")){
+                localStorage.removeItem("token");
+                alert("you are logged out")
+                document.getElementById("logout").style.display = "none";
+                document.getElementById("information").style.display = "none";
+                showSignin();
+
+            }
+        }
+        function showSignin(){
+            document.getElementById("signin").style.display = "block"
+            document.getElementById("signup").style.display = "none"
+        }
+        function showSignup(){
+            document.getElementById("signin").style.display = "none"
+            document.getElementById("signup").style.display = "block"
+        }
+    </script>
+</head>
+<body>
+    <div id="signup">
+        Signup
+        <input id="signup-username" type="text" name="username" placeholder="Username">
+        <input id="signup-password" type="password" name="password" placeholder="Password">
+        <button onclick="signup()">Submit</button>
+        <p>Signed Up already?</p> <button onClick="showSignin()">Sign in</button>
+    </div>
+    <div id="signin" style="display:none">
+        Signin
+        <input id="signin-username" type="text" name="username" placeholder="Username">
+        <input id="signin-password" type="password" name="password" placeholder="Password">
+        <button onclick="signin()">Submit</button>
+        <p>Not signed in?</p> <button onClick="showSignup()">Sign up</button>
+
+    </div>
+    <div>
+        User information: 
+        <div id="information"></div>
+    </div>
+    <div id="logout">
+        <button onclick="logout()">Logout</button>
+    </div>
+</body>
+</html>
