@@ -7,7 +7,7 @@ const {UserModel, TodoModel} = require("./db")
 const app = express()
 const secret = "iykyk"
 
-mongoose.connect("mongodb+srv://dipanwitabala02:GYG645JwxwDP2GuW@cluster0.1o4mm2o.mongodb.net/todo-app-database")
+mongoose.connect("")
 
 app.use(express.json());
 
